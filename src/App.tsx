@@ -1,51 +1,37 @@
 import { useEffect, useState } from "react";
+import type {
+  Item,
+  ItemFilter,
+  ItemListResponse,
+  ItemSortField,
+} from "./domains/item/types";
+import { listItems } from "./domains/item/item-api";
 
-export type Item = {
-  id: number;
-  itemName: string;
-  price: number;
-};
-
-export type PaginationMeta = {
-  page: number;
-  pageSize: number;
-  totalCount: number;
-  totalPages: number;
-  hasNext: boolean;
-  hasPrevious: boolean;
-};
-
-export type ListItemResponse = {
-  success: boolean;
-  data: Item[];
-  meta: PaginationMeta;
-};
-
-function ItemListPage() {
+function App() {
   const [items, setItems] = useState<Item[]>([]);
-  const [meta, setMeta] = useState<PaginationMeta | null>(null);
+  const [meta, setMeta] = useState<ItemListResponse["meta"] | null>(null);
+
   const [itemName, setItemName] = useState("");
   const [price, setPrice] = useState("");
-  const [sortOrder, setSortOrder] = useState("asc");
-  const [sortField, setSortField] = useState("itemName");
-  const [mode, setMode] = useState("and");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+  const [sortField, setSortField] = useState<ItemSortField>("itemName");
+  const [mode, setMode] = useState<"and" | "or">("and");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
   async function fetchItems() {
-    const params = new URLSearchParams({
+    const filter: ItemFilter = {
       sortOrder,
       sortField,
       mode,
-      page: String(page),
-      pageSize: String(pageSize),
-    });
+      page,
+      pageSize,
+    };
 
-    if (itemName) params.set("itemName", itemName);
-    if (price) params.set("price", price);
+    if (itemName.trim()) filter.itemName = itemName;
+    if (price.trim()) filter.price = Number(price);
 
-    const res = await fetch("http://localhost:3000/item?" + params.toString());
-    const json: ListItemResponse = await res.json();
+    const json = await listItems(filter);
 
     setItems(json.data);
     setMeta(json.meta);
@@ -76,31 +62,38 @@ function ItemListPage() {
           value={price}
           onChange={(e) => setPrice(e.target.value)}
         />
+
         <select
           value={sortField}
-          onChange={(e) => setSortField(e.target.value)}
+          onChange={(e) => setSortField(e.target.value as ItemSortField)}
         >
           <option value="itemName">itemName</option>
           <option value="price">price</option>
         </select>
+
         <select
           value={sortOrder}
-          onChange={(e) => setSortOrder(e.target.value)}
+          onChange={(e) => setSortOrder(e.target.value as "asc" | "desc")}
         >
           <option value="asc">asc</option>
           <option value="desc">desc</option>
         </select>
-        <select value={mode} onChange={(e) => setMode(e.target.value)}>
+
+        <select
+          value={mode}
+          onChange={(e) => setMode(e.target.value as "and" | "or")}
+        >
           <option value="and">and</option>
           <option value="or">or</option>
         </select>
+
         <input
           type="number"
           min={1}
           value={pageSize}
           onChange={(e) => setPageSize(Number(e.target.value))}
-          placeholder="Page size"
         />
+
         <button onClick={applyFilters}>Apply</button>
       </div>
 
@@ -112,10 +105,11 @@ function ItemListPage() {
             <th>Price</th>
           </tr>
         </thead>
+
         <tbody>
           {items.map((item) => (
-            <tr key={item.id}>
-              <td>{item.id}</td>
+            <tr key={item.itemId}>
+              <td>{item.itemId}</td>
               <td>{item.itemName}</td>
               <td>{item.price}</td>
             </tr>
@@ -127,14 +121,19 @@ function ItemListPage() {
         <div>
           <button
             disabled={!meta.hasPrevious}
-            onClick={() => setPage(page - 1)}
+            onClick={() => setPage((p) => p - 1)}
           >
             Previous
           </button>
+
           <span>
             Page {meta.page} / {meta.totalPages}
           </span>
-          <button disabled={!meta.hasNext} onClick={() => setPage(page + 1)}>
+
+          <button
+            disabled={!meta.hasNext}
+            onClick={() => setPage((p) => p + 1)}
+          >
             Next
           </button>
         </div>
@@ -143,4 +142,4 @@ function ItemListPage() {
   );
 }
 
-export default ItemListPage;
+export default App;
