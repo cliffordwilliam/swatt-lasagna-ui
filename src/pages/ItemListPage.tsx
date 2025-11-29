@@ -1,4 +1,24 @@
 import { useEffect, useState } from "react";
+import {
+  Box,
+  Button,
+  Container,
+  TextField,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Typography,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Stack,
+  Pagination,
+} from "@mui/material";
 import type {
   Item,
   ItemFilter,
@@ -10,7 +30,6 @@ import { listItems } from "../domains/item/item-api";
 function ItemListPage() {
   const [items, setItems] = useState<Item[]>([]);
   const [meta, setMeta] = useState<ItemListResponse["meta"] | null>(null);
-
   const [itemName, setItemName] = useState("");
   const [price, setPrice] = useState("");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
@@ -27,12 +46,9 @@ function ItemListPage() {
       page,
       pageSize,
     };
-
     if (itemName.trim()) filter.itemName = itemName;
     if (price.trim()) filter.price = Number(price);
-
     const json = await listItems(filter);
-
     setItems(json.data);
     setMeta(json.meta);
   }
@@ -47,98 +63,117 @@ function ItemListPage() {
   };
 
   return (
-    <>
-      <h1>Item List</h1>
+    <Container maxWidth="lg" sx={{ py: 4 }}>
+      <Typography variant="h3" component="h1" gutterBottom>
+        Item List
+      </Typography>
 
-      <div>
-        <input
-          placeholder="Item name"
-          value={itemName}
-          onChange={(e) => setItemName(e.target.value)}
-        />
-        <input
-          placeholder="Price"
-          type="number"
-          value={price}
-          onChange={(e) => setPrice(e.target.value)}
-        />
+      <Paper sx={{ p: 3, mb: 3 }}>
+        <Stack direction="row" flexWrap="wrap" sx={{ gap: 2 }}>
+          <TextField
+            label="Item name"
+            value={itemName}
+            onChange={(e) => setItemName(e.target.value)}
+            sx={{ minWidth: 200 }}
+          />
+          <TextField
+            label="Price"
+            type="number"
+            value={price}
+            onChange={(e) => setPrice(e.target.value)}
+            sx={{ minWidth: 150 }}
+          />
+          <FormControl sx={{ minWidth: 150 }}>
+            <InputLabel>Sort Field</InputLabel>
+            <Select
+              value={sortField}
+              label="Sort Field"
+              onChange={(e) => setSortField(e.target.value as ItemSortField)}
+            >
+              <MenuItem value="itemName">Item Name</MenuItem>
+              <MenuItem value="price">Price</MenuItem>
+            </Select>
+          </FormControl>
+          <FormControl sx={{ minWidth: 120 }}>
+            <InputLabel>Order</InputLabel>
+            <Select
+              value={sortOrder}
+              label="Order"
+              onChange={(e) => setSortOrder(e.target.value as "asc" | "desc")}
+            >
+              <MenuItem value="asc">Ascending</MenuItem>
+              <MenuItem value="desc">Descending</MenuItem>
+            </Select>
+          </FormControl>
+          <FormControl sx={{ minWidth: 120 }}>
+            <InputLabel>Mode</InputLabel>
+            <Select
+              value={mode}
+              label="Mode"
+              onChange={(e) => setMode(e.target.value as "and" | "or")}
+            >
+              <MenuItem value="and">AND</MenuItem>
+              <MenuItem value="or">OR</MenuItem>
+            </Select>
+          </FormControl>
+          <TextField
+            label="Page Size"
+            type="number"
+            value={pageSize}
+            onChange={(e) => setPageSize(Number(e.target.value))}
+            slotProps={{ htmlInput: { min: 1 } }}
+            sx={{ minWidth: 120 }}
+          />
+          <Button
+            variant="contained"
+            onClick={applyFilters}
+            sx={{ height: 56 }}
+          >
+            Apply
+          </Button>
+        </Stack>
+      </Paper>
 
-        <select
-          value={sortField}
-          onChange={(e) => setSortField(e.target.value as ItemSortField)}
-        >
-          <option value="itemName">itemName</option>
-          <option value="price">price</option>
-        </select>
-
-        <select
-          value={sortOrder}
-          onChange={(e) => setSortOrder(e.target.value as "asc" | "desc")}
-        >
-          <option value="asc">asc</option>
-          <option value="desc">desc</option>
-        </select>
-
-        <select
-          value={mode}
-          onChange={(e) => setMode(e.target.value as "and" | "or")}
-        >
-          <option value="and">and</option>
-          <option value="or">or</option>
-        </select>
-
-        <input
-          type="number"
-          min={1}
-          value={pageSize}
-          onChange={(e) => setPageSize(Number(e.target.value))}
-        />
-
-        <button onClick={applyFilters}>ItemListPagely</button>
-      </div>
-
-      <table>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Name</th>
-            <th>Price</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          {items.map((item) => (
-            <tr key={item.itemId}>
-              <td>{item.itemId}</td>
-              <td>{item.itemName}</td>
-              <td>{item.price}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <TableContainer component={Paper}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>ID</TableCell>
+              <TableCell>Name</TableCell>
+              <TableCell align="right">Price</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {items.map((item) => (
+              <TableRow
+                key={item.itemId}
+                sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+              >
+                <TableCell>{item.itemId}</TableCell>
+                <TableCell>{item.itemName}</TableCell>
+                <TableCell align="right">${item.price}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
 
       {meta && (
-        <div>
-          <button
-            disabled={!meta.hasPrevious}
-            onClick={() => setPage((p) => p - 1)}
-          >
-            Previous
-          </button>
-
-          <span>
-            Page {meta.page} / {meta.totalPages}
-          </span>
-
-          <button
-            disabled={!meta.hasNext}
-            onClick={() => setPage((p) => p + 1)}
-          >
-            Next
-          </button>
-        </div>
+        <Box sx={{ display: "flex", justifyContent: "center", mt: 3 }}>
+          <Stack spacing={2} alignItems="center">
+            <Pagination
+              count={meta.totalPages}
+              page={meta.page}
+              onChange={(_, value) => setPage(value)}
+              color="primary"
+            />
+            <Typography variant="body2" color="text.secondary">
+              Page {meta.page} of {meta.totalPages}
+            </Typography>
+          </Stack>
+        </Box>
       )}
-    </>
+    </Container>
   );
 }
 
