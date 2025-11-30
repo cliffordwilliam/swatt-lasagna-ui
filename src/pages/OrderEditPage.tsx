@@ -104,7 +104,7 @@ function OrderEditPage() {
       }
     }
 
-    fetchOrder();
+    void fetchOrder();
   }, [id]);
 
   const handleChange = (field: string, value: unknown) => {
@@ -226,7 +226,7 @@ function OrderEditPage() {
     try {
       const response = await updateOrder(Number(id), result.data);
       if (response.success) {
-        navigate(`/orders/${id}`);
+        void navigate(`/orders/${id}`);
       }
     } catch (error) {
       setApiError(
@@ -251,7 +251,9 @@ function OrderEditPage() {
         <Alert severity="error">{apiError}</Alert>
         <Button
           variant="outlined"
-          onClick={() => navigate("/orders")}
+          onClick={() => {
+            void navigate("/orders");
+          }}
           sx={{ mt: 2 }}
         >
           Back to List
@@ -267,7 +269,11 @@ function OrderEditPage() {
       </Typography>
 
       <Paper sx={{ p: 3, mt: 3 }}>
-        <form onSubmit={handleSubmit}>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+          }}
+        >
           <Stack spacing={4}>
             {apiError && <Alert severity="error">{apiError}</Alert>}
 
@@ -589,7 +595,10 @@ function OrderEditPage() {
 
               <Stack spacing={2}>
                 {formData.items?.map((item, index) => (
-                  <Paper key={index} sx={{ p: 2, bgcolor: "grey.50" }}>
+                  <Paper
+                    key={`item-${item.itemId}-${crypto.randomUUID()}`}
+                    sx={{ p: 2, bgcolor: "grey.50" }}
+                  >
                     <Stack spacing={2}>
                       <Stack
                         direction="row"
@@ -668,12 +677,21 @@ function OrderEditPage() {
             <Stack direction="row" spacing={2} justifyContent="flex-end">
               <Button
                 variant="outlined"
-                onClick={() => navigate(`/orders/${id}`)}
+                onClick={() => {
+                  void navigate(`/orders/${id}`);
+                }}
                 disabled={isSubmitting}
               >
                 Cancel
               </Button>
-              <Button type="submit" variant="contained" disabled={isSubmitting}>
+              <Button
+                type="submit"
+                variant="contained"
+                disabled={isSubmitting}
+                onClick={(e) => {
+                  void handleSubmit(e);
+                }}
+              >
                 {isSubmitting ? "Updating..." : "Update Order"}
               </Button>
             </Stack>

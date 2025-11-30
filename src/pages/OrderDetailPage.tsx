@@ -46,7 +46,7 @@ function OrderDetailPage() {
       }
     }
 
-    fetchOrder();
+    void fetchOrder();
   }, [id]);
 
   if (isLoading) {
@@ -63,7 +63,9 @@ function OrderDetailPage() {
         <Alert severity="error">{error || "Order not found"}</Alert>
         <Button
           variant="outlined"
-          onClick={() => navigate("/orders")}
+          onClick={() => {
+            void navigate("/orders");
+          }}
           sx={{ mt: 2 }}
         >
           Back to List
@@ -92,12 +94,19 @@ function OrderDetailPage() {
           Order Details
         </Typography>
         <Stack direction="row" spacing={2}>
-          <Button variant="outlined" onClick={() => navigate("/orders")}>
+          <Button
+            variant="outlined"
+            onClick={() => {
+              void navigate("/orders");
+            }}
+          >
             Back to List
           </Button>
           <Button
             variant="contained"
-            onClick={() => navigate(`/orders/${id}/edit`)}
+            onClick={() => {
+              void navigate(`/orders/${id}/edit`);
+            }}
           >
             Edit Order
           </Button>
@@ -246,8 +255,10 @@ function OrderDetailPage() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {order.orderItems.map((item, index) => (
-                <TableRow key={index}>
+              {order.orderItems.map((item) => (
+                <TableRow
+                  key={`order-item-${item.itemId}-${crypto.randomUUID()}`}
+                >
                   <TableCell>{item.itemId}</TableCell>
                   <TableCell>{item.itemName}</TableCell>
                   <TableCell align="right">

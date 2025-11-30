@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Box,
@@ -47,7 +47,7 @@ function ItemListPage() {
   const [error, setError] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
 
-  async function fetchItems() {
+  const fetchItems = useCallback(async () => {
     setIsLoading(true);
     setError("");
 
@@ -69,15 +69,15 @@ function ItemListPage() {
     } finally {
       setIsLoading(false);
     }
-  }
+  }, [sortOrder, sortField, mode, page, pageSize, itemName, price]);
 
   useEffect(() => {
-    fetchItems();
-  }, [page]);
+    void fetchItems();
+  }, [fetchItems, page]);
 
   const applyFilters = () => {
     setPage(1);
-    fetchItems();
+    void fetchItems();
   };
 
   return (
@@ -91,7 +91,12 @@ function ItemListPage() {
         <Typography variant="h3" component="h1">
           Item List
         </Typography>
-        <Button variant="contained" onClick={() => navigate("/items/create")}>
+        <Button
+          variant="contained"
+          onClick={() => {
+            void navigate("/items/create");
+          }}
+        >
           Create New Item
         </Button>
       </Stack>
@@ -141,9 +146,7 @@ function ItemListPage() {
                 <Select
                   value={sortOrder}
                   label="Order"
-                  onChange={(e) =>
-                    setSortOrder(e.target.value as "asc" | "desc")
-                  }
+                  onChange={(e) => setSortOrder(e.target.value)}
                 >
                   <MenuItem value="asc">Ascending</MenuItem>
                   <MenuItem value="desc">Descending</MenuItem>
@@ -154,7 +157,7 @@ function ItemListPage() {
                 <Select
                   value={mode}
                   label="Mode"
-                  onChange={(e) => setMode(e.target.value as "and" | "or")}
+                  onChange={(e) => setMode(e.target.value)}
                 >
                   <MenuItem value="and">AND</MenuItem>
                   <MenuItem value="or">OR</MenuItem>
@@ -201,7 +204,9 @@ function ItemListPage() {
                       <Tooltip title="View Details">
                         <IconButton
                           size="small"
-                          onClick={() => navigate(`/items/${item.itemId}`)}
+                          onClick={() => {
+                            void navigate(`/items/${item.itemId}`);
+                          }}
                           color="primary"
                         >
                           <ViewIcon />
@@ -210,7 +215,9 @@ function ItemListPage() {
                       <Tooltip title="Edit Item">
                         <IconButton
                           size="small"
-                          onClick={() => navigate(`/items/${item.itemId}/edit`)}
+                          onClick={() => {
+                            void navigate(`/items/${item.itemId}/edit`);
+                          }}
                           color="secondary"
                         >
                           <EditIcon />

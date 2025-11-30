@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Box,
@@ -52,7 +52,7 @@ function OrderListPage() {
   const [error, setError] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
 
-  async function fetchOrders() {
+  const fetchOrders = useCallback(async () => {
     setIsLoading(true);
     setError("");
 
@@ -77,15 +77,26 @@ function OrderListPage() {
     } finally {
       setIsLoading(false);
     }
-  }
+  }, [
+    sortOrder,
+    sortField,
+    mode,
+    page,
+    pageSize,
+    po,
+    buyerId,
+    recipientId,
+    orderStatus,
+    payment,
+  ]);
 
   useEffect(() => {
-    fetchOrders();
-  }, [page]);
+    void fetchOrders();
+  }, [fetchOrders, page]);
 
   const applyFilters = () => {
     setPage(1);
-    fetchOrders();
+    void fetchOrders();
   };
 
   const formatDate = (dateString: string) => {
@@ -107,7 +118,12 @@ function OrderListPage() {
         <Typography variant="h3" component="h1">
           Order List
         </Typography>
-        <Button variant="contained" onClick={() => navigate("/orders/create")}>
+        <Button
+          variant="contained"
+          onClick={() => {
+            void navigate("/orders/create");
+          }}
+        >
           Create New Order
         </Button>
       </Stack>
@@ -152,7 +168,7 @@ function OrderListPage() {
                   value={orderStatus}
                   label="Order Status"
                   onChange={(e) =>
-                    setOrderStatus(e.target.value as OrderStatus | "")
+                    setOrderStatus(e.target.value as typeof orderStatus)
                   }
                 >
                   <MenuItem value="">All</MenuItem>
@@ -166,7 +182,7 @@ function OrderListPage() {
                 <Select
                   value={payment}
                   label="Payment"
-                  onChange={(e) => setPayment(e.target.value as Payment | "")}
+                  onChange={(e) => setPayment(e.target.value as typeof payment)}
                 >
                   <MenuItem value="">All</MenuItem>
                   <MenuItem value="Tunai">Tunai</MenuItem>
@@ -196,9 +212,7 @@ function OrderListPage() {
                 <Select
                   value={sortOrder}
                   label="Order"
-                  onChange={(e) =>
-                    setSortOrder(e.target.value as "asc" | "desc")
-                  }
+                  onChange={(e) => setSortOrder(e.target.value)}
                 >
                   <MenuItem value="asc">Ascending</MenuItem>
                   <MenuItem value="desc">Descending</MenuItem>
@@ -209,7 +223,7 @@ function OrderListPage() {
                 <Select
                   value={mode}
                   label="Mode"
-                  onChange={(e) => setMode(e.target.value as "and" | "or")}
+                  onChange={(e) => setMode(e.target.value)}
                 >
                   <MenuItem value="and">AND</MenuItem>
                   <MenuItem value="or">OR</MenuItem>
@@ -268,7 +282,9 @@ function OrderListPage() {
                       <Tooltip title="View Details">
                         <IconButton
                           size="small"
-                          onClick={() => navigate(`/orders/${order.orderId}`)}
+                          onClick={() => {
+                            void navigate(`/orders/${order.orderId}`);
+                          }}
                           color="primary"
                         >
                           <ViewIcon />
@@ -277,9 +293,9 @@ function OrderListPage() {
                       <Tooltip title="Edit Order">
                         <IconButton
                           size="small"
-                          onClick={() =>
-                            navigate(`/orders/${order.orderId}/edit`)
-                          }
+                          onClick={() => {
+                            void navigate(`/orders/${order.orderId}/edit`);
+                          }}
                           color="secondary"
                         >
                           <EditIcon />

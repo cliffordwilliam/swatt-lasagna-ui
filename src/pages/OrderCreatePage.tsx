@@ -169,7 +169,7 @@ function OrderCreatePage() {
     try {
       const response = await createOrder(result.data);
       if (response.success) {
-        navigate(`/orders/${response.data.orderId}`);
+        void navigate(`/orders/${response.data.orderId}`);
       }
     } catch (error) {
       setApiError(
@@ -187,7 +187,11 @@ function OrderCreatePage() {
       </Typography>
 
       <Paper sx={{ p: 3, mt: 3 }}>
-        <form onSubmit={handleSubmit}>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+          }}
+        >
           <Stack spacing={4}>
             {apiError && <Alert severity="error">{apiError}</Alert>}
 
@@ -513,7 +517,10 @@ function OrderCreatePage() {
 
               <Stack spacing={2}>
                 {formData.items.map((item, index) => (
-                  <Paper key={index} sx={{ p: 2, bgcolor: "grey.50" }}>
+                  <Paper
+                    key={`item-${item.itemId}-${crypto.randomUUID()}`}
+                    sx={{ p: 2, bgcolor: "grey.50" }}
+                  >
                     <Stack spacing={2}>
                       <Stack
                         direction="row"
@@ -594,12 +601,21 @@ function OrderCreatePage() {
             <Stack direction="row" spacing={2} justifyContent="flex-end">
               <Button
                 variant="outlined"
-                onClick={() => navigate("/orders")}
+                onClick={() => {
+                  void navigate("/orders");
+                }}
                 disabled={isSubmitting}
               >
                 Cancel
               </Button>
-              <Button type="submit" variant="contained" disabled={isSubmitting}>
+              <Button
+                type="submit"
+                variant="contained"
+                disabled={isSubmitting}
+                onClick={(e) => {
+                  void handleSubmit(e);
+                }}
+              >
                 {isSubmitting ? "Creating..." : "Create Order"}
               </Button>
             </Stack>

@@ -39,7 +39,7 @@ function ItemDetailPage() {
       }
     }
 
-    fetchItem();
+    void fetchItem();
   }, [id]);
 
   if (isLoading) {
@@ -56,7 +56,9 @@ function ItemDetailPage() {
         <Alert severity="error">{error || "Item not found"}</Alert>
         <Button
           variant="outlined"
-          onClick={() => navigate("/items")}
+          onClick={() => {
+            void navigate("/items");
+          }}
           sx={{ mt: 2 }}
         >
           Back to List
@@ -81,12 +83,19 @@ function ItemDetailPage() {
           Item Details
         </Typography>
         <Stack direction="row" spacing={2}>
-          <Button variant="outlined" onClick={() => navigate("/items")}>
+          <Button
+            variant="outlined"
+            onClick={() => {
+              void navigate("/items");
+            }}
+          >
             Back to List
           </Button>
           <Button
             variant="contained"
-            onClick={() => navigate(`/items/${id}/edit`)}
+            onClick={() => {
+              void navigate(`/items/${id}/edit`);
+            }}
           >
             Edit Item
           </Button>

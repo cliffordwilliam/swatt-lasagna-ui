@@ -63,7 +63,7 @@ function ItemCreatePage() {
     try {
       const response = await createItem(result.data);
       if (response.success) {
-        navigate(`/items/${response.data.itemId}`);
+        void navigate(`/items/${response.data.itemId}`);
       }
     } catch (error) {
       setApiError(
@@ -81,7 +81,11 @@ function ItemCreatePage() {
       </Typography>
 
       <Paper sx={{ p: 3, mt: 3 }}>
-        <form onSubmit={handleSubmit}>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+          }}
+        >
           <Stack spacing={3}>
             {apiError && <Alert severity="error">{apiError}</Alert>}
 
@@ -117,12 +121,21 @@ function ItemCreatePage() {
             <Stack direction="row" spacing={2} justifyContent="flex-end">
               <Button
                 variant="outlined"
-                onClick={() => navigate("/items")}
+                onClick={() => {
+                  void navigate("/items");
+                }}
                 disabled={isSubmitting}
               >
                 Cancel
               </Button>
-              <Button type="submit" variant="contained" disabled={isSubmitting}>
+              <Button
+                type="submit"
+                variant="contained"
+                disabled={isSubmitting}
+                onClick={(e) => {
+                  void handleSubmit(e);
+                }}
+              >
                 {isSubmitting ? "Creating..." : "Create Item"}
               </Button>
             </Stack>

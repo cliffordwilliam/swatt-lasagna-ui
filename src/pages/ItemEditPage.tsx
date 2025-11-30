@@ -51,7 +51,7 @@ function ItemEditPage() {
       }
     }
 
-    fetchItem();
+    void fetchItem();
   }, [id]);
 
   const handleChange =
@@ -96,7 +96,7 @@ function ItemEditPage() {
     try {
       const response = await updateItem(Number(id), result.data);
       if (response.success) {
-        navigate(`/items/${id}`);
+        void navigate(`/items/${id}`);
       }
     } catch (error) {
       setApiError(
@@ -121,7 +121,9 @@ function ItemEditPage() {
         <Alert severity="error">{apiError}</Alert>
         <Button
           variant="outlined"
-          onClick={() => navigate("/items")}
+          onClick={() => {
+            void navigate("/items");
+          }}
           sx={{ mt: 2 }}
         >
           Back to List
@@ -137,7 +139,11 @@ function ItemEditPage() {
       </Typography>
 
       <Paper sx={{ p: 3, mt: 3 }}>
-        <form onSubmit={handleSubmit}>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+          }}
+        >
           <Stack spacing={3}>
             {apiError && <Alert severity="error">{apiError}</Alert>}
 
@@ -171,12 +177,21 @@ function ItemEditPage() {
             <Stack direction="row" spacing={2} justifyContent="flex-end">
               <Button
                 variant="outlined"
-                onClick={() => navigate(`/items/${id}`)}
+                onClick={() => {
+                  void navigate(`/items/${id}`);
+                }}
                 disabled={isSubmitting}
               >
                 Cancel
               </Button>
-              <Button type="submit" variant="contained" disabled={isSubmitting}>
+              <Button
+                type="submit"
+                variant="contained"
+                disabled={isSubmitting}
+                onClick={(e) => {
+                  void handleSubmit(e);
+                }}
+              >
                 {isSubmitting ? "Updating..." : "Update Item"}
               </Button>
             </Stack>
